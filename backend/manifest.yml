@@ -1,0 +1,35 @@
+name: PotatoPedia
+description: A collaborative encyclopedia of potato varieties.
+
+entities:
+  User:
+    authenticable: true
+    properties:
+      - { name: name, type: string, validation: { required: true } }
+      - { name: email, type: email, validation: { required: true, unique: true } }
+      - { name: role, type: choice, options: { values: [admin, contributor], default: contributor } }
+    access_policies:
+      - role: admin
+        permissions: [create, read, update, delete]
+      - role: contributor
+        permissions: [read, update]
+        condition: "user.id === id"
+
+  Potato:
+    properties:
+      - { name: name, type: string, validation: { required: true } }
+      - { name: description, type: text }
+      - { name: origin, type: string }
+      - { name: color, type: string }
+      - { name: bestFor, type: choice, options: { values: [Frying, Roasting, Boiling, Mashing, Salads], default: Boiling } }
+      - { name: image, type: image, options: { sizes: { thumbnail: { width: 400, height: 300, fit: cover } } } }
+    belongsTo:
+      - { name: contributor, entity: User }
+    access_policies:
+      - role: public
+        permissions: [read]
+      - role: admin
+        permissions: [create, read, update, delete]
+      - role: contributor
+        permissions: [create, read, update, delete]
+        condition: "user.id === contributor.id"
